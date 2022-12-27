@@ -1,0 +1,32 @@
+if (_toDoController.text.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Container(
+                  padding: EdgeInsets.all(16),
+                  height: 90,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20), color: tdRed),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "You can not create an empty task",
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        "Put something in the input bar, then click the plus button",
+                        style: TextStyle(fontSize: 12, color: Colors.white),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    ],
+                  ),
+                ),
+                behavior: SnackBarBehavior.floating,
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+              ));
+            } else {
+              _addToDoItem(_toDoController.text);
+            }
