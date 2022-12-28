@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:to_do_list_app/constants/colors.dart';
 import 'package:to_do_list_app/model/todo.dart';
 
@@ -10,13 +11,12 @@ class ToDoItem extends StatelessWidget {
   final ToDo toDo;
   final onToDoChanged;
   final onDeleteItem;
-  final onDeletFromBox;
-  const ToDoItem(
-      {super.key,
-      required this.toDo,
-      required this.onToDoChanged,
-      required this.onDeleteItem,
-      required this.onDeletFromBox});
+  const ToDoItem({
+    super.key,
+    required this.toDo,
+    required this.onToDoChanged,
+    required this.onDeleteItem,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,6 @@ class ToDoItem extends StatelessWidget {
               icon: Icon(Icons.delete),
               onPressed: () {
                 onDeleteItem(toDo.id);
-                onDeletFromBox(toDo.id);
               },
             )),
       ),

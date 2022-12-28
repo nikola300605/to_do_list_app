@@ -7,37 +7,40 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:to_do_list_app/constants/colors.dart';
+import 'package:to_do_list_app/database.dart';
 import 'package:to_do_list_app/model/todo.dart';
 import 'package:to_do_list_app/widgets/todo_item.dart';
 
 class Home extends StatefulWidget {
   Home({super.key});
-
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  final _myBox = Hive.box('ToDoListBox');
-  final todosList = ToDo.todoList();
   final _toDoController = TextEditingController();
-  var id = 0;
-  List<ToDo> _foundToDo = [];
+  List _foundToDo = [];
+  final _myBox = Hive.box('ToDoListBox1');
+  ToDoDatabase db = ToDoDatabase();
 
   @override
   void initState() {
     // TODO: implement initState
-    _foundToDo = todosList;
-    super.initState();
-    print("startup");
-    var keys = _myBox.keys.toList();
-    var values = _myBox.values.toList();
-    for (var i = 0; i < keys.length; i++) {
-      var Todo = ToDo(
-          id: _myBox.keys.toList()[i].toString(),
-          todoText: _myBox.values.toList()[i]);
-      todosList.add(Todo);
+
+    if (_myBox.get("TODOLIST") == null) {
+      db.createInitialData();
+    } else {
+      db.loadData();
     }
+    _foundToDo = db.toDoList;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    Hive.box('ToDoListBox').close();
+    super.dispose();
   }
 
   @override
@@ -57,7 +60,7 @@ class _HomeState extends State<Home> {
                     Container(
                       margin: EdgeInsets.only(top: 50, bottom: 20),
                       child: Text(
-                        "All ToDo's",
+                        "Your tasks",
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.w500,
@@ -69,7 +72,6 @@ class _HomeState extends State<Home> {
                         toDo: todo,
                         onToDoChanged: _handleToDoChange,
                         onDeleteItem: _deleteToDoItem,
-                        onDeletFromBox: _deleteFromBox,
                       )
                   ],
                 ),
@@ -121,10 +123,10 @@ class _HomeState extends State<Home> {
                   children: [
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          elevation: 0,
+                          backgroundColor: Colors.blueAccent,
+                          elevation: 2,
                           minimumSize: Size(100.0, 40.0)),
-                      onPressed: () {
+                      onPressed: () async {
                         if (_toDoController.text.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Container(
@@ -160,7 +162,6 @@ class _HomeState extends State<Home> {
                           Navigator.of(context).pop();
                         } else {
                           _addToDoItem(_toDoController.text);
-
                           Navigator.of(context).pop();
                         }
                       },
@@ -175,8 +176,8 @@ class _HomeState extends State<Home> {
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          elevation: 0,
+                          backgroundColor: Colors.blueAccent,
+                          elevation: 2,
                           minimumSize: Size(100.0, 40.0)),
                       onPressed: () => Navigator.of(context).pop(),
                       child: Align(
@@ -200,35 +201,33 @@ class _HomeState extends State<Home> {
     setState(() {
       toDo.isDone = !toDo.isDone;
     });
+    db.updateDataBase();
   }
 
   void _deleteToDoItem(String id) {
     setState(() {
-      todosList.removeWhere((element) => element.id == id);
+      db.toDoList.removeWhere((element) => element.id == id);
     });
+    db.updateDataBase();
   }
 
   void _addToDoItem(String todoText) {
-    var toDo = ToDo(id: id.toString(), todoText: todoText);
+    var toDo = ToDo(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        todoText: todoText);
     setState(() {
-      todosList.add(toDo);
-      id++;
+      db.toDoList.add(toDo);
     });
     _toDoController.clear();
-    _myBox.put(id, toDo);
-    print(_myBox.get(id));
-  }
-
-  void _deleteFromBox(String id) {
-    _myBox.delete(id);
+    db.updateDataBase();
   }
 
   void _runFilter(String keyWords) {
-    List<ToDo> result = [];
+    List result = [];
     if (keyWords.isEmpty) {
-      result = todosList;
+      result = db.toDoList;
     } else {
-      result = todosList
+      result = db.toDoList
           .where((element) =>
               element.todoText!.toLowerCase().contains(keyWords.toLowerCase()))
           .toList();
@@ -279,12 +278,7 @@ class _HomeState extends State<Home> {
               borderRadius: BorderRadius.circular(20),
               child: Image.asset('assets/images/avatar.png'),
             ),
-          ),
-          ElevatedButton(
-              onPressed: () => print("$todosList  $id"),
-              child: Text("stisni me")),
-          ElevatedButton(
-              onPressed: (() => print(_myBox.values)), child: Text("s"))
+          )
         ],
       ),
     );
