@@ -9,6 +9,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:to_do_list_app/constants/colors.dart';
 import 'package:to_do_list_app/database.dart';
 import 'package:to_do_list_app/model/todo.dart';
+import 'package:to_do_list_app/screens/profile.dart';
 import 'package:to_do_list_app/widgets/todo_item.dart';
 
 class Home extends StatefulWidget {
@@ -263,24 +264,30 @@ class _HomeState extends State<Home> {
     return AppBar(
       elevation: 0,
       backgroundColor: tdBgColor,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Icon(
-            Icons.menu,
-            color: tdBlack,
-            size: 30,
-          ),
-          Container(
-            height: 40,
-            width: 40,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Image.asset('assets/images/avatar.png'),
-            ),
-          )
-        ],
+      leading: const Icon(
+        Icons.menu,
+        color: tdBlack,
+        size: 30,
       ),
+      actions: [
+        Container(
+          width: 90,
+          height: 90,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+          child: IconButton(
+            icon: Image.asset(
+              'assets/images/avatar.png',
+            ),
+            onPressed: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => Profile()));
+            },
+            style: IconButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                focusColor: Colors.transparent),
+          ),
+        )
+      ],
     );
   }
 }
